@@ -14,9 +14,18 @@ const sequelize = new Sequelize(
         define: {
             timestamps: false,
             freezeTableName: true
-
         },
-        logging: false
+        dialectOptions: {
+          options: {
+            requestTimeout: 3000
+          }
+        },
+        pool: {
+          max: 10,
+          min: 0,
+          idle: 10000
+        },
+        logging: true
     }
 );
 
