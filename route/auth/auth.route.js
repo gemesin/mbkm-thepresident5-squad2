@@ -50,12 +50,6 @@ if (!createUser) {
 });
 
 router.post("/login", loginValidator ,async (req, res) => {
-  // const errors = validationResult(req);
-
-  // if (!errors.isEmpty()) {
-  //   return res.status(400).json({ errors: errors.array() });
-  // }
-  
   const { email, password } = req.body;
 
   const user = await userModel.findOne({
@@ -75,7 +69,7 @@ if (!user) {
 
   if (cleanPassword != cleanSavedPassword) {
     return res
-      .status(401)
+      .status(400)
       .json({ status: "failed", message: "Invalid username or password" });
   }
 

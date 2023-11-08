@@ -1,6 +1,7 @@
 const express = require('express');
 const { protect } = require('../middleware/middleware');
 const router = express.Router();
+const axios = require('axios');
 
 const { userModel } = require('../models')
 
@@ -12,6 +13,44 @@ router.get('/user', protect, async (req, res) => {
         data: dataUser
     });
 });
+
+// Endpoint untuk mengambil data suhu, cuaca, dan kelembaban berdasarkan latitude dan longitude
+router.get('/weather', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    const apiKey = '859110c5e10e40ca3fd54dabb1a31914'; // Gantilah dengan kunci API Anda
+
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Latitude (lat) dan Longitude (lon) harus disertakan dalam permintaan.' });
+    }
+
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+    const response = await axios.get(apiUrl);
+    const weatherData = response.data;
+
+    // Menampilkan data suhu, cuaca, dan kelembaban dalam respons
+    const temperature = weatherData.main.temp;
+    const weatherDescription = weatherData.weather[0].description;
+    const humidity = weatherData.main.humidity;
+    const cityName = weatherData.name;
+
+    const responseData = {
+      city: cityName,
+      temperature: temperature,
+      weatherDescription: weatherDescription,
+      humidity: humidity
+    };
+
+    res.json(responseData);
+  } catch (error) {
+    console.error('Terjadi kesalahan:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan dalam permintaan.' });
+  }
+});
+
+
+
+
 
 router.get('/user/:id', async (req, res) => {
     const id = req.params.id;

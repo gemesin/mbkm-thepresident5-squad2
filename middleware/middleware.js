@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const { userModel } = require('../models');
 
 const protect = async (req, res, next) => {
-  const token = req.headers?.authorization?.split(" ")[1];
+  const token = req.headers['x-api-key']; // Menggunakan "x-api-key" sebagai nama header
+
   if (token) {
     try {
       const verify = jwt.verify(token, SECRET_KEY);
