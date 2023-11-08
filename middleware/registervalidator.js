@@ -18,6 +18,7 @@ const registerValidator = [
 
       return true;
     }),
+    
 ];
 
 module.exports = registerValidator;

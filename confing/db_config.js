@@ -1,8 +1,9 @@
 const dbConfig = {
-    host: 'localhost',
+    host: 'msib-mysql-db',
     user: 'root',
-    password: '',
-    db: 'social_media_db',
+    password: 'root@msib',
+    db: 'msib_squad2',
+    Port: 3306,
     dialect: 'mysql'
 }
 

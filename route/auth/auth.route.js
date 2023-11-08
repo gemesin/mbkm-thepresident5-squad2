@@ -6,10 +6,10 @@ const {  SECRET_KEY } = require("../../items");
 const { userModel } = require('../../models');
 
 const { body, validationResult } = require("express-validator");
-const erorHandlerMiddleware = require('c:/Users/user/code/foru_coba_coba/middleware/error-handling');
+const erorHandlerMiddleware = require('../../middleware/error-handling');
 
-const registerValidator = require("c:/Users/user/code/foru_coba_coba/middleware/registervalidator");
-const loginValidator = require("c:/Users/user/code/foru_coba_coba/middleware/loginvalidator");
+const registerValidator = require("../../middleware/registervalidator");
+const loginValidator = require("../../middleware/loginvalidator");
 
 
 router.post("/register", registerValidator ,async (req, res) => {
@@ -50,12 +50,6 @@ if (!createUser) {
 });
 
 router.post("/login", loginValidator ,async (req, res) => {
-  // const errors = validationResult(req);
-
-  // if (!errors.isEmpty()) {
-  //   return res.status(400).json({ errors: errors.array() });
-  // }
-  
   const { email, password } = req.body;
 
   const user = await userModel.findOne({
@@ -75,7 +69,7 @@ if (!user) {
 
   if (cleanPassword != cleanSavedPassword) {
     return res
-      .status(401)
+      .status(400)
       .json({ status: "failed", message: "Invalid username or password" });
   }
 

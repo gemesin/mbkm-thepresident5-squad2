@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  msib-squad2-app:
+    container_name: msib-squad2-app
+    image: msib-squad2-app/app:latest
+    ports:
+      - "8002:8002"
+    restart: on-failure

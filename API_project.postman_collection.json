@@ -72,83 +72,10 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Get all users",
+					"name": "New Request",
 					"request": {
 						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:5000/users",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get user by id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:5000/users/:id",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite user",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjk1NTUxNTU2fQ.8wKU6AEii-H2Y4MVIjQnM8DSDajbTyTAGemakKUN_aU",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"student_id\": 1,\r\n    \"user_id\": 1,\r\n    \"role\": \"editor\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:5000/users/invite",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								"invite"
-							]
-						}
+						"header": []
 					},
 					"response": []
 				}
