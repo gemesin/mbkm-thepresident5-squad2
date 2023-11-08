@@ -9,5 +9,6 @@ services:
     restart: on-failure
 
 networks:
-  mysql_default:
-    external: true
+  default:
+    external:
+      name: mysql_default
