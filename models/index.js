@@ -10,20 +10,10 @@ const sequelize = new Sequelize(
     {
         host: dbConfig.host,
         dialect: dbConfig.dialect,
-        port : dbConfig.Port,
+        port: dbConfig.port,
         define: {
             timestamps: false,
             freezeTableName: true
-        },
-        dialectOptions: {
-          options: {
-            requestTimeout: 3000
-          }
-        },
-        pool: {
-          max: 10,
-          min: 0,
-          idle: 10000
         },
         logging: true
     }
@@ -41,12 +31,12 @@ db.commentModel = require('./comment.model')(sequelize, Sequelize);
 // db.defineAssociations = require('./associations')(sequelize, Sequelize);
 // defineAssociations(db.userModel, db.threadsModel, db.commentModel);
 
-sequelize.sync()
-  .then(() => {
-    console.log('Database sudah terhubung dan model telah disinkronkan.');
-  })
-  .catch((err) => {
-    console.error('Kesalahan dalam menyinkronkan model dengan database:', err);
-  });
+// sequelize.sync()
+//   .then(() => {
+//     console.log('Database sudah terhubung dan model telah disinkronkan.');
+//   })
+//   .catch((err) => {
+//     console.error('Kesalahan dalam menyinkronkan model dengan database:', err);
+//   });
 
 module.exports = db;

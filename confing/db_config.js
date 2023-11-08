@@ -3,7 +3,7 @@ const dbConfig = {
     user: 'root',
     password: 'root@msib',
     db: 'msib_squad2',
-    Port: 4000,
+    port: 4000,
     dialect: 'mysql'
 }
 
