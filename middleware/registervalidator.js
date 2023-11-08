@@ -18,15 +18,7 @@ const registerValidator = [
 
       return true;
     }),
-    body("tanggal_lahir")
-    .notEmpty().withMessage("email wajib diisi")
-    .custom((value) => {
-      const datePattern = /^\d{2}-\d{2}-\d{4}$/;
-      if (!datePattern.test(value)) {
-        throw new Error('Format tanggal tidak valid (MM-DD-YYYY)');
-      }
-      return true;
-    }),
+    
 ];
 
 module.exports = registerValidator;

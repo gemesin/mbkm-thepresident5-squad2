@@ -6,10 +6,10 @@ const {  SECRET_KEY } = require("../../items");
 const { userModel } = require('../../models');
 
 const { body, validationResult } = require("express-validator");
-const erorHandlerMiddleware = require('c:/Users/user/code/foru_coba_coba/middleware/error-handling');
+const erorHandlerMiddleware = require('../../middleware/error-handling');
 
-const registerValidator = require("c:/Users/user/code/foru_coba_coba/middleware/registervalidator");
-const loginValidator = require("c:/Users/user/code/foru_coba_coba/middleware/loginvalidator");
+const registerValidator = require("../../middleware/registervalidator");
+const loginValidator = require("../../middleware/loginvalidator");
 
 
 router.post("/register", registerValidator ,async (req, res) => {
