@@ -10,6 +10,7 @@ const sequelize = new Sequelize(
     {
         host: dbConfig.host,
         dialect: dbConfig.dialect,
+        port : dbConfig.Port,
         define: {
             timestamps: false,
             freezeTableName: true

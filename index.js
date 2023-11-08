@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 app.use("/users",userRoute);
 app.use("/auth", authRoute);
 
-const port = 8000;
+const port = 8002;
 
 app.listen(port, () =>{
     console.log(`server starter on port ${port}`)
