@@ -24,6 +24,15 @@ app.get('/', (req, res) => {
 })
 });
 
+app.post('/Auth/forget_pass', (req, res) => {
+    
+    res.status(200).json({
+        message: 'Password reset instructions sent successfully',
+        data: {}
+    });
+});
+
+
 app.use("/users",userRoute);
 app.use("/auth", authRoute);
 
@@ -32,3 +41,4 @@ const port = 8002;
 app.listen(port, () =>{
     console.log(`server starter on port ${port}`)
 })
+

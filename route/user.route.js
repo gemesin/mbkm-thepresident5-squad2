@@ -157,4 +157,51 @@ router.delete('/user/:id', async (req, res) => {
         })
 })
 
+//endpoint forget password
+router.post('/Auth/forget_pass', async (req, res) => {
+    const { email, securityQuestion, securityAnswer } = req.body;
+
+    try {
+        // Find the user by email
+        const user = await userModel.findOne({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found',
+                data: {}
+            });
+        }
+
+        if (user.security_question === securityQuestion && user.security_answer === securityAnswer) {
+            const resetToken = generateResetToken();
+
+            user.resetToken = resetToken;
+
+            await user.save();
+
+            sendResetPasswordEmail(user.email, resetToken);
+
+            return res.status(200).json({
+                message: 'Password reset instructions sent successfully',
+                data: {}
+            });
+        } else {
+            return res.status(400).json({
+                message: 'Security question/answer do not match',
+                data: {}
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({
+            message: 'Internal Server Error',
+            data: {}
+        });
+    }
+});
+
 module.exports = router
