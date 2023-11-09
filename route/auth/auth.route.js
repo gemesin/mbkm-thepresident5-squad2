@@ -30,9 +30,9 @@ router.post("/register", registerValidator, async (req, res) => {
   };
 
   const createUser = await userModel.create({
-    ...newUserdb,
+    ...newUser,
   });
-  delete newUser.password;
+  delete newUserdb.password;
 
   if (!createUser) {
     return res.status(400).json({
@@ -44,7 +44,7 @@ router.post("/register", registerValidator, async (req, res) => {
   return res.status(201).json({
     error: false,
     message: "Berhasil menambahkan data user",
-    data: newUser,
+    data: newUserdb,
   });
 });
 
@@ -55,40 +55,39 @@ router.post("/login", loginValidator, async (req, res) => {
     return res.status(400).json({ error: true, errors: errors.array() });
   }
 
-
-
   const user = await userModel.findOne({
     where: {
       email: email,
-      password: password,
     },
   });
+  
 
   if (!user) {
-    return res.status(401).json({
+    return res.status(400).json({
       error: true,
       status: "failed",
       message: "Invalid email or password",
     });
   }
 
-  // Membersihkan (trim) password yang dimasukkan oleh pengguna dan password dari database
-  const cleanPassword = password;
-  const cleanSavedPassword = user.password;
+  const savedPassword = user.password;
 
-  if (cleanPassword != cleanSavedPassword) {
-    return res.status(400).json({
+  // Memeriksa apakah password cocok dengan yang disimpan di database
+  const isMatch = bcrypt.compareSync(password, savedPassword);
+
+  if (!isMatch) {
+    return res.status(401).json({
       error: true,
       status: "failed",
       message: "Invalid username or password",
     });
   }
 
+  // Password valid, buat dan kirimkan token
   const token = jwt.sign({ user_id: user.user_id }, SECRET_KEY);
   const data = user;
   delete data.password;
   data.token = token;
-  delete data.password;
   return res.json({
     error: false,
     status: "success",
