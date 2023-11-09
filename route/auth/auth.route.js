@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const {  SECRET_KEY } = require("../../items");
+const { SECRET_KEY } = require("../../items");
 const { userModel } = require('../../models');
 
 const { body, validationResult } = require("express-validator");
@@ -11,14 +11,13 @@ const erorHandlerMiddleware = require('../../middleware/error-handling');
 const registerValidator = require("../../middleware/registervalidator");
 const loginValidator = require("../../middleware/loginvalidator");
 
-
-router.post("/register", registerValidator ,async (req, res) => {
+router.post("/register", registerValidator, async (req, res) => {
   const errors = validationResult(req);
 
   const password = req.body.password;
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ error: true, errors: errors.array() });
   }
   const salt = bcrypt.genSaltSync(10);
   const hashPassword = bcrypt.hashSync(password, salt);
@@ -31,48 +30,53 @@ router.post("/register", registerValidator ,async (req, res) => {
   };
 
   const createUser = await userModel.create({
-    ...newUserdb
-})
-delete newUser.password;
+    ...newUserdb,
+  });
+  delete newUser.password;
 
-if (!createUser) {
-    return res.status(400)
-    .json({
-        message: "Gagal Menambah users",
-        data: {}
-    })
-} return res.status(201)
-.json({
+  if (!createUser) {
+    return res.status(400).json({
+      error: true,
+      message: "Gagal Menambah users",
+      data: {},
+    });
+  }
+  return res.status(201).json({
+    error: false,
     message: "Berhasil menambahkan data user",
-    data: newUser
-})  
-
+    data: newUser,
+  });
 });
 
-router.post("/login", loginValidator ,async (req, res) => {
+router.post("/login", loginValidator, async (req, res) => {
   const { email, password } = req.body;
 
   const user = await userModel.findOne({
     where: {
-        email: email,
-        password: password,
+      email: email,
+      password: password,
     },
-});
+  });
 
-if (!user) {
-  return res.status(401).json({ status: "failed", message: "Invalid email or password" });
-}
+  if (!user) {
+    return res.status(401).json({
+      error: true,
+      status: "failed",
+      message: "Invalid email or password",
+    });
+  }
 
-// Membersihkan (trim) password yang dimasukkan oleh pengguna dan password dari database
+  // Membersihkan (trim) password yang dimasukkan oleh pengguna dan password dari database
   const cleanPassword = password;
   const cleanSavedPassword = user.password;
 
   if (cleanPassword != cleanSavedPassword) {
-    return res
-      .status(400)
-      .json({ status: "failed", message: "Invalid username or password" });
+    return res.status(400).json({
+      error: true,
+      status: "failed",
+      message: "Invalid username or password",
+    });
   }
-
 
   const token = jwt.sign({ user_id: user.user_id }, SECRET_KEY);
   const data = user;
@@ -80,6 +84,7 @@ if (!user) {
   data.token = token;
   delete data.password;
   return res.json({
+    error: false,
     status: "success",
     data,
     token,
