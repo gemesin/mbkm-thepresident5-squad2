@@ -20,16 +20,6 @@ const loginValidator = [
     }),
     body("password")
     .notEmpty().withMessage("password wajib diisi")
-    .custom(async (value) => {
-        // Menggunakan async/await untuk melakukan pencarian dalam database
-        const existingpassword = await userModel.findOne({ where: { email: value } });
-  
-        if (!existingpassword) {
-          throw new Error("Email/password salah");
-        }
-  
-        return true;
-      }),
 ];
 
 module.exports = loginValidator;

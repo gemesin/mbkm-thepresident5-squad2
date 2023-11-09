@@ -50,6 +50,12 @@ router.post("/register", registerValidator, async (req, res) => {
 
 router.post("/login", loginValidator, async (req, res) => {
   const { email, password } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: true, errors: errors.array() });
+  }
+
+
 
   const user = await userModel.findOne({
     where: {

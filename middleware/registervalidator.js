@@ -18,6 +18,9 @@ const registerValidator = [
 
       return true;
     }),
+    body("password")
+      .notEmpty().withMessage("email wajib diisi")
+      .isLength({ min: 8 }).withMessage("Password harus memiliki minimal 8 karakter"),
     
 ];
 
