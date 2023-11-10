@@ -2,6 +2,11 @@ const express = require('express');
 const { protect } = require('../middleware/middleware');
 const router = express.Router();
 const axios = require('axios');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { SECRET_KEY } = require("../items");
+
+const { body, validationResult } = require("express-validator");
 
 const { userModel } = require('../models')
 
@@ -158,7 +163,7 @@ router.delete('/user/:id', async (req, res) => {
 })
 
 //endpoint forget password
-router.post('/Auth/forget_pass', async (req, res) => {
+router.post('/forget_pass', async (req, res) => {
     const { email, securityAnswer } = req.body;
 
     try {
@@ -176,18 +181,8 @@ router.post('/Auth/forget_pass', async (req, res) => {
             });
         }
 
-        if (await bcrypt.compare(securityAnswer, user.security_answer)) {
+        if (securityAnswer == user.answer_question) {
             // Security answer matches
-            const resetToken = generateResetToken();
-            
-            // Hash the reset token before saving it to the user
-            const hashedResetToken = await bcrypt.hash(resetToken, saltRounds);
-            user.resetToken = hashedResetToken;
-
-            await user.save();
-
-            sendResetPasswordEmail(user.email, resetToken);
-
             return res.status(200).json({
                 message: 'Password reset instructions sent successfully',
                 data: {}
@@ -208,7 +203,7 @@ router.post('/Auth/forget_pass', async (req, res) => {
 });
 
 //endpoint reset password
-router.put('/Auth/new_pass', async (req, res) => {
+router.put('/new_pass', async (req, res) => {
     const { email, newPassword } = req.body;
 
     try {
@@ -218,7 +213,8 @@ router.put('/Auth/new_pass', async (req, res) => {
                 email: email
             }
         });
-
+        const id = user.id;
+        console.log("pass lama :"+user.password)
         if (!user) {
             return res.status(404).json({
                 message: 'User not found',
@@ -226,16 +222,41 @@ router.put('/Auth/new_pass', async (req, res) => {
             });
         }
 
-
-        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
         
-        user.password = hashedPassword;
+        const newUser = {
+            ...req.body,
+            password: hashedPassword,
+          };
 
-        await user.save();
+        const updateUser = await userModel.update({
+            password: hashedPassword
+        }, {
+            where: {
+                id: id
+            }
+        })
+    
+        if (!updateUser) {
+            return res.status(400)
+                .json({
+                    message: "Gagal ubah data user",
+                    data: {}
+                })
+        }
+    
+        const newpass = await userModel.findOne({
+            where: {
+                id: id
+            }
+        }) 
 
+        console.log("pass baru :"+newpass.password)
+    
         return res.status(200).json({
             message: 'Password updated successfully',
-            data: {}
+            data: newpass
         });
     } catch (error) {
         console.error('Error:', error);

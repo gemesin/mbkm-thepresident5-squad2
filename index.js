@@ -24,21 +24,7 @@ app.get('/', (req, res) => {
 })
 });
 
-app.post('/Auth/forget_pass', (req, res) => {
-    
-    res.status(200).json({
-        message: 'Password reset instructions sent successfully',
-    
-    });
-});
 
-app.put('/Auth/new_pass', (req, res) => {
-    
-    res.status(200).json({
-        message: 'Password reset successfuly',
-        
-    });
-});
 
 
 app.use("/users",userRoute);
