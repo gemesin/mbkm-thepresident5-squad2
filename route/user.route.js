@@ -162,6 +162,7 @@ router.delete('/user/:id', async (req, res) => {
         })
 })
 
+<<<<<<< HEAD
 //endpoint forget password
 router.post('/forget_pass', async (req, res) => {
     const { email, securityAnswer } = req.body;
@@ -266,5 +267,7 @@ router.put('/new_pass', async (req, res) => {
         });
     }
 });
+=======
+>>>>>>> 205bebcdbbac11951ff927fcaa33b37dd4c6bcb8
 
 module.exports = router
