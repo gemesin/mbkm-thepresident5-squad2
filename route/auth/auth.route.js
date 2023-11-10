@@ -84,10 +84,9 @@ router.post("/login", loginValidator, async (req, res) => {
   }
 
   // Password valid, buat dan kirimkan token
-  const token = jwt.sign({ user_id: user.user_id }, SECRET_KEY);
-  const data = user;
+  const token = jwt.sign({ user_id: user.id }, SECRET_KEY);
+  const data = user.toJSON();;
   delete data.password;
-  data.token = token;
   return res.json({
     error: false,
     status: "success",
