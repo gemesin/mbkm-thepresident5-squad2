@@ -28,7 +28,15 @@ app.post('/Auth/forget_pass', (req, res) => {
     
     res.status(200).json({
         message: 'Password reset instructions sent successfully',
-        data: {}
+    
+    });
+});
+
+app.put('/Auth/new_pass', (req, res) => {
+    
+    res.status(200).json({
+        message: 'Password reset successfuly',
+        
     });
 });
 
