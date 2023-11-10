@@ -159,7 +159,7 @@ router.delete('/user/:id', async (req, res) => {
 
 //endpoint forget password
 router.post('/Auth/forget_pass', async (req, res) => {
-    const { email, securityQuestion, securityAnswer } = req.body;
+    const { email, securityAnswer } = req.body;
 
     try {
         // Find the user by email
@@ -176,10 +176,13 @@ router.post('/Auth/forget_pass', async (req, res) => {
             });
         }
 
-        if (user.security_question === securityQuestion && user.security_answer === securityAnswer) {
+        if (await bcrypt.compare(securityAnswer, user.security_answer)) {
+            // Security answer matches
             const resetToken = generateResetToken();
-
-            user.resetToken = resetToken;
+            
+            // Hash the reset token before saving it to the user
+            const hashedResetToken = await bcrypt.hash(resetToken, saltRounds);
+            user.resetToken = hashedResetToken;
 
             await user.save();
 
@@ -191,10 +194,49 @@ router.post('/Auth/forget_pass', async (req, res) => {
             });
         } else {
             return res.status(400).json({
-                message: 'Security question/answer do not match',
+                message: 'Security answer does not match',
                 data: {}
             });
         }
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({
+            message: 'Internal Server Error',
+            data: {}
+        });
+    }
+});
+
+//endpoint reset password
+router.put('/Auth/new_pass', async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+        // Find the user by email
+        const user = await userModel.findOne({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found',
+                data: {}
+            });
+        }
+
+
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        
+        user.password = hashedPassword;
+
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Password updated successfully',
+            data: {}
+        });
     } catch (error) {
         console.error('Error:', error);
         return res.status(500).json({
