@@ -12,13 +12,13 @@ const ForgetValidator = [
       const existingDevice = await userModel.findOne({ where: { email: value } });
 
       if (!existingDevice) {
-        throw new Error("Email/answer_question salah");
+        throw new Error("Email/securityAnswer salah");
       }
 
       return true;
     }),
-    body("answer_question")
-    .notEmpty().withMessage("answer_question wajib diisi")
+    body("securityAnswer")
+    .notEmpty().withMessage("securityAnswer wajib diisi")
 ];
 
 module.exports = ForgetValidator;
