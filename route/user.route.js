@@ -2,6 +2,11 @@ const express = require('express');
 const { protect } = require('../middleware/middleware');
 const router = express.Router();
 const axios = require('axios');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { SECRET_KEY } = require("../items");
+
+const { body, validationResult } = require("express-validator");
 
 const { userModel } = require('../models')
 
@@ -156,5 +161,7 @@ router.delete('/user/:id', async (req, res) => {
             data: {}
         })
 })
+
+
 
 module.exports = router
