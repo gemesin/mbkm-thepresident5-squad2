@@ -87,6 +87,10 @@ router.post("/login", loginValidator, async (req, res) => {
 
 router.post('/forget_pass', forgetValidator , async (req, res) => {
   const { email, securityAnswer } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: true, errors: errors.array() });
+  }
 
   try {
       // Find the user by email
@@ -97,8 +101,9 @@ router.post('/forget_pass', forgetValidator , async (req, res) => {
       });
 
       if (!user) {
-          return res.status(404).json({
-              message: 'User not found',
+          return res.status(400).json({
+              error: true,
+              message: 'User tidak ditemukan',
               data: {}
           });
       }
@@ -106,11 +111,13 @@ router.post('/forget_pass', forgetValidator , async (req, res) => {
       if (securityAnswer == user.answer_question) {
           // Security answer matches
           return res.status(200).json({
+              error: false,
               message: 'Password reset instructions sent successfully',
               data: {}
           });
       } else {
           return res.status(400).json({
+              error: true,
               message: 'Security answer does not match',
               data: {}
           });
@@ -118,6 +125,7 @@ router.post('/forget_pass', forgetValidator , async (req, res) => {
   } catch (error) {
       console.error('Error:', error);
       return res.status(500).json({
+          error: true,
           message: 'Internal Server Error',
           data: {}
       });
@@ -127,6 +135,10 @@ router.post('/forget_pass', forgetValidator , async (req, res) => {
 
 router.put('/new_pass', newpassValidator , async (req, res) => {
   const { email, newPassword } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: true, errors: errors.array() });
+  }
 
   try {
       // Find the user by email
@@ -135,15 +147,15 @@ router.put('/new_pass', newpassValidator , async (req, res) => {
               email: email
           }
       });
-      const id = user.id;
-      console.log("pass lama :"+user.password)
+    
       if (!user) {
-          return res.status(404).json({
+          return res.status(400).json({
+            error: true,
               message: 'User not found',
               data: {}
           });
       }
-
+      const id = user.id;
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
       
@@ -163,6 +175,7 @@ router.put('/new_pass', newpassValidator , async (req, res) => {
       if (!updateUser) {
           return res.status(400)
               .json({
+                error: true,
                   message: "Gagal ubah data user",
                   data: {}
               })
@@ -174,15 +187,21 @@ router.put('/new_pass', newpassValidator , async (req, res) => {
           }
       }) 
 
-      console.log("pass baru :"+newpass.password)
+
+      
+      const data = newpass.toJSON();
+      delete data.password;
+      
   
       return res.status(200).json({
+        error: false,
           message: 'Password updated successfully',
-          data: newpass
+          data: data
       });
   } catch (error) {
       console.error('Error:', error);
       return res.status(500).json({
+        error: true,
           message: 'Internal Server Error',
           data: {}
       });
