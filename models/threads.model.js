@@ -26,7 +26,7 @@ module.exports = (sequelize, Sequelize) => {
 
     // Pastikan Anda telah mengimpor model User dan menentukan hubungan dengan benar
     Thread.belongsTo(User, {
-        foreignKey: 'user_id',
+        foreignKey: 'user_id', 
     });
 
     return Thread;

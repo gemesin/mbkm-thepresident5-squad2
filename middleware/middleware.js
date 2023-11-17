@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { userModel } = require('../models');
 
 const protect = async (req, res, next) => {
-  const token = req.headers?.authorization?.split(" ")[1];
+  const token = req.headers['x-api-key'];
 
   if (token) {
     try {
