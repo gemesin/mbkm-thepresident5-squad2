@@ -8,15 +8,15 @@ const { locationModel, weather_dataModel } = require('../models'); // Sesuaikan 
 
 router.use(protect);
 
-router.get('/weather', protect,async (req, res) => {
+router.get('/weather', protect, async (req, res) => {
     try {
         const { lat, lon } = req.query;
         const parsedLat = parseFloat(lat);
         const parsedLon = parseFloat(lon);
 
-if (isNaN(parsedLat) || isNaN(parsedLon)) {
-    return res.status(400).json({ error: 'Latitude dan Longitude harus nilai numerik.' });
-}
+        if (isNaN(parsedLat) || isNaN(parsedLon)) {
+            return res.status(400).json({ error: 'Latitude dan Longitude harus nilai numerik.' });
+        }
 
         // Cek apakah data cuaca sudah ada dalam database untuk lokasi dan waktu yang sesuai
         const currentTime = new Date();
@@ -36,7 +36,7 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
 
             }
         });
-        
+
         if (location) {
             console.log('Query Where:', {
                 hasil: location,
@@ -62,9 +62,9 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
                         temperature: weatherData.temperature,
                         weatherDescription: weatherData.weather_description,
                         humidity: weatherData.humidity,
-                        feelsLike: weatherData.feels_like,
-                        uvIndex: weatherData.uv_index,
-                        rainLevel: weatherData.rain_level,
+                        rainChance: weatherData.rain_chance,
+                        windSpeed: weatherData.wind_speed,
+                        rainVolume: weatherData.rain_volume,
                         weatherIcon: weatherData.weather_icon
                     },
                     hourlyWeather: weatherData.hourly_weather,
@@ -85,7 +85,7 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
         const hourlyWeatherResponse = await axios.get(hourlyWeatherUrl);
         const hourlyWeatherData = hourlyWeatherResponse.data;
         const weaklyWeatherData = hourlyWeatherResponse.data;
-        
+
 
         const getWeatherGroup = (weatherId) => {
             if (weatherId >= 200 && weatherId < 300) return 'thunderstorm';
@@ -103,11 +103,50 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
             return logo[group];
         };
 
-        // Ambil data hourly untuk 4 jam ke depan
-        const nextFourHoursWeather = hourlyWeatherData.hourly.slice(0, 6);
+        const currentTimestamp = Math.floor(currentTime.getTime() / 1000);
+        const hourlyWeather = hourlyWeatherData.hourly.filter(hour => hour.dt >= currentTimestamp - 3600 && hour.dt <= currentTimestamp + 4 * 3600);
+        
+        const previousHourTimestamp = currentTimestamp - 3600;
+        
+        const hourlyWeatherBefore = hourlyWeather
+          .filter(hour => hour.dt >= previousHourTimestamp && hour.dt < currentTimestamp)
+          .map(hour => ({
+            time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            temperature: hour.temp,
+            pop: hour.pop,
+            weatherDescription: hour.weather[0].description,
+            weatherIcon: getWeatherLogo(hour.weather[0].id)
+          }));
+        
+        const hourlyWeatherNow = {
+          time: new Date(currentTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          temperature: hourlyWeatherData.current.temp,
+          weatherDescription: hourlyWeatherData.current.weather[0].description,
+          pop: hourlyWeatherData.current.pop, 
+          weatherIcon: getWeatherLogo(hourlyWeatherData.current.weather[0].id)
+        };
+        
+      
 
+        const hourlyWeatherNext4Hours = hourlyWeather
+          .filter(hour => hour.dt >= currentTimestamp && hour.dt <= currentTimestamp + 4 * 3600)
+          .map(hour => ({
+            time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            temperature: hour.temp,
+            weatherDescription: hour.weather[0].description,
+            pop: hour.pop,
+            weatherIcon: getWeatherLogo(hour.weather[0].id)
+          }));
+        
+        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext4Hours);
+        
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
+        const lastHourlyWeatherBefore = hourlyWeatherBefore[hourlyWeatherBefore.length - 1];
+        const rainChanceValue = lastHourlyWeatherBefore ? lastHourlyWeatherBefore.pop : 0;
+
+
+        console.log("pop: "+rainChanceValue)
 
         const insertLocation = await locationModel.create({
             latitude: lat,
@@ -122,24 +161,19 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
             temperature: currentWeatherData.main.temp,
             weather_description: currentWeatherData.weather[0].description,
             humidity: currentWeatherData.main.humidity,
-            feels_like: currentWeatherData.main.feels_like,
-            uv_index: hourlyWeatherData.current.uvi,
-            rain_level: hourlyWeatherData.current.rain ? hourlyWeatherData.current.rain['1h'] : 0,
+            rain_chance: rainChanceValue.toString(),
+            wind_speed: hourlyWeatherData.current.wind_speed,
+            rain_volume: hourlyWeatherData.current.rain ? hourlyWeatherData.current.rain['1h'] : 0,
             weather_icon: getWeatherLogo(currentWeatherData.weather[0].id),
             cached: true,
-            hourly_weather: nextFourHoursWeather.map(hour => ({
-                time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-                temperature: hour.temp,
-                weatherDescription: hour.weather[0].description,
-                weatherIcon: getWeatherLogo(hour.weather[0].id) // Perbarui cara mendapatkan ikon cuaca per jam
-            })),
+            hourly_weather: hourlyWeatherSorted,
             weakly_weather: weeklyWeather.map(day => ({
                 date: new Date(day.dt * 1000).toLocaleDateString('en-US'),
                 temperature: day.temp.day,
                 weatherDescription: day.weather[0].description,
                 weatherIcon: getWeatherLogo(day.weather[0].id) // Perbarui cara mendapatkan ikon cuaca mingguan
             }))
-            
+
         });
 
         // Kirim data cuaca ke klien
@@ -149,17 +183,12 @@ if (isNaN(parsedLat) || isNaN(parsedLon)) {
                 temperature: insertedWeatherData.temperature,
                 weatherDescription: insertedWeatherData.weather_description,
                 humidity: insertedWeatherData.humidity,
-                feelsLike: insertedWeatherData.feels_like,
-                uvIndex: insertedWeatherData.uv_index,
-                rainLevel: insertedWeatherData.rain_level,
+                rainChance: insertedWeatherData.rain_chance,
+                windSpeed: insertedWeatherData.wind_speed,
+                rainVolume: insertedWeatherData.rain_volume,
                 weatherIcon: insertedWeatherData.weather_icon
             },
-            hourlyWeather: nextFourHoursWeather.map(hour => ({
-                time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-                temperature: hour.temp,
-                weatherDescription: hour.weather[0].description,
-                weatherIcon: getWeatherLogo(hour.weather[0].id)
-            })),
+            hourlyWeather: insertedWeatherData.hourly_weather,
             weeklyWeather: weeklyWeather.map(day => ({
                 date: new Date(day.dt * 1000).toLocaleDateString('en-US'),
                 temperature: day.temp.day,
@@ -199,7 +228,7 @@ router.get('/user/:id', async (req, res) => {
 })
 
 router.post('/user', async (req, res) => {
-    const {name, email} = req.body;
+    const { name, email } = req.body;
 
     const createUser = await userModel.create({
         name: name,
@@ -208,15 +237,15 @@ router.post('/user', async (req, res) => {
 
     if (!createUser) {
         return res.status(400)
-        .json({
-            message: "Gagal Menambah users",
-            data: {}
-        })
+            .json({
+                message: "Gagal Menambah users",
+                data: {}
+            })
     } return res.status(201)
-    .json({
-        message: "Berhasil menambahkan data user",
-        data: createUser
-    })  
+        .json({
+            message: "Berhasil menambahkan data user",
+            data: createUser
+        })
 
 });
 
