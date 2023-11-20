@@ -146,7 +146,7 @@ router.get('/weather', protect, async (req, res) => {
         
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
-        const lastHourlyWeatherBefore = hourlyWeatherBefore[hourlyWeatherBefore.length - 1];
+        const lastHourlyWeatherBefore = hourlyWeatherNow[hourlyWeatherNow.length - 1];
         const rainChanceValue = lastHourlyWeatherBefore ? lastHourlyWeatherBefore.pop : 0;
 
 
