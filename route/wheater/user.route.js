@@ -103,50 +103,52 @@ router.get('/weather', protect, async (req, res) => {
             return logo[group];
         };
 
-        const currentTimestamp = Math.floor(currentTime.getTime() / 1000);
-        const hourlyWeather = hourlyWeatherData.hourly.filter(hour => hour.dt >= currentTimestamp - 3600 && hour.dt <= currentTimestamp + 4 * 3600);
+        const currentTimestamp = currentWeatherData.dt;
+
+        // Ambil data cuaca per jam untuk 6 jam ke depan
+        const hourlyWeather = hourlyWeatherData.hourly.filter(hour => hour.dt >= currentTimestamp && hour.dt <= currentTimestamp + 6 * 3600);
         
         const previousHourTimestamp = currentTimestamp - 3600;
         
         const hourlyWeatherBefore = hourlyWeather
-          .filter(hour => hour.dt >= previousHourTimestamp && hour.dt < currentTimestamp)
-          .map(hour => ({
-            time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-            temperature: hour.temp,
-            pop: hour.pop,
-            weatherDescription: hour.weather[0].description,
-            weatherIcon: getWeatherLogo(hour.weather[0].id)
-          }));
+            .filter(hour => hour.dt >= previousHourTimestamp && hour.dt < currentTimestamp)
+            .map(hour => ({
+                time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                temperature: hour.temp,
+                pop: hour.pop,
+                weatherDescription: hour.weather[0].description,
+                weatherIcon: getWeatherLogo(hour.weather[0].id)
+            }));
+        
+        console.log("data sebelum: " + hourlyWeatherBefore);
         
         const hourlyWeatherNow = {
-          time: new Date(currentTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-          temperature: hourlyWeatherData.current.temp,
-          weatherDescription: hourlyWeatherData.current.weather[0].description,
-          pop: hourlyWeatherData.current.pop, 
-          weatherIcon: getWeatherLogo(hourlyWeatherData.current.weather[0].id)
+            time: new Date(currentTimestamp * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            temperature: hourlyWeatherData.current.temp,
+            weatherDescription: hourlyWeatherData.current.weather[0].description,
+            pop: hourlyWeatherData.current.pop,
+            weatherIcon: getWeatherLogo(hourlyWeatherData.current.weather[0].id)
         };
         
-      
-
-        const hourlyWeatherNext4Hours = hourlyWeather
-          .filter(hour => hour.dt >= currentTimestamp && hour.dt <= currentTimestamp + 4 * 3600)
-          .map(hour => ({
-            time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-            temperature: hour.temp,
-            weatherDescription: hour.weather[0].description,
-            pop: hour.pop,
-            weatherIcon: getWeatherLogo(hour.weather[0].id)
-          }));
+        const currentTimestampPlus5Hours = currentTimestamp + 5 * 3600;
         
-        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext4Hours);
+        const hourlyWeatherNext5Hours = hourlyWeather
+            .filter(hour => hour.dt > currentTimestamp && hour.dt <= currentTimestampPlus5Hours)
+            .map(hour => ({
+                time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                temperature: hour.temp,
+                weatherDescription: hour.weather[0].description,
+                pop: hour.pop,
+                weatherIcon: getWeatherLogo(hour.weather[0].id)
+            }));
+        
+        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext5Hours);
         
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
         const lastHourlyWeatherBefore = hourlyWeatherBefore[hourlyWeatherBefore.length - 1];
         const rainChanceValue = lastHourlyWeatherBefore ? lastHourlyWeatherBefore.pop : 0;
 
-
-        console.log("pop: "+rainChanceValue)
 
         const insertLocation = await locationModel.create({
             latitude: lat,
