@@ -142,7 +142,7 @@ router.get('/weather', protect, async (req, res) => {
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
         
-        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeather, hourlyWeatherNext5Hours);
+        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext5Hours);
         
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
