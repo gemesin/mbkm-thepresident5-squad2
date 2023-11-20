@@ -1,10 +1,10 @@
 const express = require('express');
-const { protect } = require('../middleware/middleware');
+const { protect } = require('../../middleware/middleware');
 const axios = require('axios');
 const router = express.Router();
 const { Op } = require('sequelize');
-const { logo } = require("../items");
-const { locationModel, weather_dataModel } = require('../models'); // Sesuaikan dengan path dan nama model yang sesuai
+const { logo } = require("../../items");
+const { locationModel, weather_dataModel } = require('../../models'); // Sesuaikan dengan path dan nama model yang sesuai
 
 router.use(protect);
 

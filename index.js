@@ -3,7 +3,7 @@ const app = express();
 
 const db = require('./models')
 
-const userRoute = require('./route/user.route')
+const weatherRoute = require('./route/wheater/user.route')
 const authRoute = require("./route/auth/auth.route");
 
 
@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 
 
 
-app.use("/users",userRoute);
+app.use("/weather",weatherRoute);
 app.use("/auth", authRoute);
 
 const port = 8002;
