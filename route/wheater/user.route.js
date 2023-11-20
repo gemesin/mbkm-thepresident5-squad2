@@ -142,12 +142,12 @@ router.get('/weather', protect, async (req, res) => {
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
         
-        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext5Hours);
+        const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeather, hourlyWeatherNext5Hours);
         
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
         const lastHourlyWeatherBefore = hourlyWeatherNow[hourlyWeatherNow.length - 1];
-        const rainChanceValue = lastHourlyWeatherBefore ? lastHourlyWeatherBefore.pop : 0;
+        const rainChanceValue = hourlyWeatherNext5Hours[0].pop ? hourlyWeatherNext5Hours[0].pop : 0;
 
 
         const insertLocation = await locationModel.create({
