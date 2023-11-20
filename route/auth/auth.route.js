@@ -72,6 +72,14 @@ router.post("/login", loginValidator, async (req, res) => {
     });
   }
 
+  const savedPassword = user.password;
+  const isMatch = bcrypt.compareSync(password, savedPassword);
+  if (!isMatch) {
+    return res
+      .status(401)
+      .json({ status: "failed", message: "Invalid username or password" });
+  }
+
   // Password valid, buat dan kirimkan token
   const token = jwt.sign({ user_id: user.id }, SECRET_KEY);
   const data = user.toJSON();;
