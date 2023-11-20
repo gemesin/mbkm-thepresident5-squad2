@@ -4,8 +4,8 @@ const app = express();
 const db = require('./models')
 
 const weatherRoute = require('./route/wheater/user.route')
-const authRoute = require("./route/auth/auth.route");
 
+const authRoute = require("./route/auth/auth.route");
 const articleRoute = require("./route/artikel/route.index")
 
 

@@ -1,3 +1,5 @@
+const { DataTypes } = require('sequelize');
+
 module.exports = (sequelize, Sequelize) => {
     const Artikel = sequelize.define('Artikel', {
         id: { 
@@ -18,7 +20,7 @@ module.exports = (sequelize, Sequelize) => {
         image: {
           type: DataTypes.TEXT,
         },
-        desc: {
+        description: {
           type: DataTypes.STRING(225),
         },
         article: {
@@ -34,9 +36,17 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true, 
             field: 'updatedAt'
         },
+    });
 
-      });
+    Artikel.findAllArticles = async () => {
+      try {
+        const articles = await Artikel.findAll();
+        return articles;
+      } catch (error) {
+        throw error;
+      }
+    };
+  
   
     return Artikel;
-  }
-  
+};
