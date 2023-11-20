@@ -103,7 +103,7 @@ router.get('/weather', protect, async (req, res) => {
             return logo[group];
         };
 
-        const currentTimestamp = currentWeatherData.dt;
+        const currentTimestamp = currentWeatherData.dt  + 7 * 3600;
 
         // Ambil data cuaca per jam untuk 6 jam ke depan
         const hourlyWeather = hourlyWeatherData.hourly.filter(hour => hour.dt >= currentTimestamp && hour.dt <= currentTimestamp + 6 * 3600);
