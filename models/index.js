@@ -29,6 +29,9 @@ db.threadsModel = require('./threads.model')(sequelize, Sequelize);
 db.commentModel = require('./comment.model')(sequelize, Sequelize);
 db.locationModel = require('./location.model')(sequelize, Sequelize);
 db.weather_dataModel = require('./weather_data.model')(sequelize, Sequelize);
+db.articleModel = require('./article.model')(sequelize, Sequelize);
+
+
 
 // db.defineAssociations = require('./associations')(sequelize, Sequelize);
 // defineAssociations(db.userModel, db.threadsModel, db.commentModel);
