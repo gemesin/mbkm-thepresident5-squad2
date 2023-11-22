@@ -38,10 +38,10 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             field: 'rain_chance'
         },
-        wind_speed: {
+        uv_index: {
             type: Sequelize.FLOAT,
             allowNull: false,
-            field: 'wind_speed'
+            field: 'uv_index'
         },
         rain_volume: {
             type: Sequelize.FLOAT,
