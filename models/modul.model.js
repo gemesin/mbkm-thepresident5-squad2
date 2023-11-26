@@ -20,11 +20,10 @@ const Groupmodul = require('./groupmodul.model')(sequelize, Sequelize);
     description: {
       type: Sequelize.STRING(225),
     },
-    content: {
-      type: Sequelize.TEXT,
-    },
     createdAt: {
       type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('current_timestamp()'), 
+      field: 'createdAt'
     },
     updatedAt: {
       type: Sequelize.DATE,

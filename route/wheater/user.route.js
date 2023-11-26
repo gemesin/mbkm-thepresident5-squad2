@@ -3,7 +3,7 @@ const { protect } = require('../../middleware/middleware');
 const axios = require('axios');
 const router = express.Router();
 const { Op } = require('sequelize');
-const { logo } = require("../../items");
+const { logo, suggest } = require("../../items");
 const { locationModel, weather_dataModel } = require('../../models'); // Sesuaikan dengan path dan nama model yang sesuai
 
 router.use(protect);
@@ -64,8 +64,10 @@ router.get('/weather', protect, async (req, res) => {
                         humidity: weatherData.humidity,
                         rainChance: weatherData.rain_chance,
                         indexUV: weatherData.uv_index,
+                        windspeed: weatherData.wind_speed,
                         rainVolume: weatherData.rain_volume,
-                        weatherIcon: weatherData.weather_icon
+                        weatherIcon: weatherData.weather_icon,
+                        suggest: weatherData.suggest
                     },
                     hourlyWeather: weatherData.hourly_weather,
                     weeklyWeather: weatherData.weakly_weather,
@@ -103,6 +105,11 @@ router.get('/weather', protect, async (req, res) => {
             return logo[group];
         };
 
+        const getWeatherSuggest = (weatherId) => {
+            const group = getWeatherGroup(weatherId);
+            return suggest[group];
+        };
+
         const currentTimestamp = currentWeatherData.dt  + 7 * 3600;
 
         // Ambil data cuaca per jam untuk 6 jam ke depan
@@ -116,6 +123,8 @@ router.get('/weather', protect, async (req, res) => {
                 time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
                 temperature: hour.temp - 273.15,
                 pop: hour.pop,
+                uv_index: hour.uvi,
+                wind_speed: hour.wind_speed,
                 weatherDescription: hour.weather[0].description,
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
@@ -126,7 +135,9 @@ router.get('/weather', protect, async (req, res) => {
             time: new Date(currentTimestamp * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
             temperature: hourlyWeatherData.current.temp - 273.15,
             weatherDescription: hourlyWeatherData.current.weather[0].description,
-            pop: hourlyWeatherData.current.pop,
+            pop: hourlyWeatherData.hourly.pop,
+            uv_index: hourlyWeatherData.current.uvi,
+            wind_speed: hourlyWeatherData.current.wind_speed,
             weatherIcon: getWeatherLogo(hourlyWeatherData.current.weather[0].id)
         };
         
@@ -139,6 +150,8 @@ router.get('/weather', protect, async (req, res) => {
                 temperature: hour.temp - 273.15,
                 weatherDescription: hour.weather[0].description,
                 pop: hour.pop,
+                uv_index: hour.uvi,
+                wind_speed: hour.wind_speed,
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
         
@@ -165,13 +178,17 @@ router.get('/weather', protect, async (req, res) => {
             humidity: currentWeatherData.main.humidity,
             rain_chance: rainChanceValue.toString(),
             uv_index: hourlyWeatherData.current.uvi,
+            wind_speed: hourlyWeatherData.current.wind_speed,
             rain_volume: hourlyWeatherData.current.rain ? hourlyWeatherData.current.rain['1h'] : 0,
             weather_icon: getWeatherLogo(currentWeatherData.weather[0].id),
+            suggest: getWeatherSuggest(currentWeatherData.weather[0].id),
             cached: true,
             hourly_weather: hourlyWeatherSorted,
             weakly_weather: weeklyWeather.map(day => ({
                 date: new Date(day.dt * 1000).toLocaleDateString('en-US'),
                 temperature: day.temp.day - 273.15,
+                uv_index: day.uvi,
+                wind_speed: day.wind_speed,
                 weatherDescription: day.weather[0].description,
                 weatherIcon: getWeatherLogo(day.weather[0].id) // Perbarui cara mendapatkan ikon cuaca mingguan
             }))
@@ -187,20 +204,24 @@ router.get('/weather', protect, async (req, res) => {
                 humidity: insertedWeatherData.humidity,
                 rainChance: insertedWeatherData.rain_chance,
                 indexUV: insertedWeatherData.uv_index,
+                windspeed: insertedWeatherData.wind_speed,
                 rainVolume: insertedWeatherData.rain_volume,
-                weatherIcon: insertedWeatherData.weather_icon
+                weatherIcon: insertedWeatherData.weather_icon,
+                suggest: insertedWeatherData.suggest
             },
             hourlyWeather: insertedWeatherData.hourly_weather,
             weeklyWeather: weeklyWeather.map(day => ({
                 date: new Date(day.dt * 1000).toLocaleDateString('en-US'),
                 temperature: day.temp.day - 273.15,
+                uv_index: day.uvi,
+                wind_speed: day.wind_speed,
                 weatherDescription: day.weather[0].description,
                 weatherIcon: getWeatherLogo(day.weather[0].id)
             }))
         });
     } catch (error) {
         console.error('Terjadi kesalahan:', error);
-        res.status(500).json({ error: 'Terjadi kesalahan dalam permintaan.' });
+        res.status(400).json({ error: 'Terjadi kesalahan dalam permintaan.' });
     }
 });
 

@@ -16,11 +16,18 @@ module.exports = (sequelize, Sequelize) => {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
+        name: { 
+          type: Sequelize.STRING,
+          allowNull: false,
+      },
         isi: {
           type: Sequelize.TEXT,
         },
         createdAt: {
           type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('current_timestamp()'), 
+          field: 'createdAt'
+          
         },
         updatedAt: {
           type: Sequelize.DATE,
@@ -31,7 +38,7 @@ module.exports = (sequelize, Sequelize) => {
       UlasanModulModel.belongsTo(User, { foreignKey: 'id_user' });
       UlasanModulModel.belongsTo(Modul, { foreignKey: 'id_modul' });
     
-      return ModulModel;
+      return UlasanModulModel;
     };
     
     

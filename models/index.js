@@ -12,7 +12,9 @@ const sequelize = new Sequelize(
         dialect: dbConfig.dialect,
         port: dbConfig.port,
         define: {
-            timestamps: false,
+            timestamps: true,
+            createdAt: 'createdAt',
+            updatedAt: 'updatedAt',
             freezeTableName: true
         },
         logging: true
@@ -32,6 +34,7 @@ db.weather_dataModel = require('./weather_data.model')(sequelize, Sequelize);
 db.articleModel = require('./article.model')(sequelize, Sequelize);
 db.GroupArticleModel = require('./groupmodul.model')(sequelize, Sequelize);
 db.ModulModel = require('./modul.model')(sequelize, Sequelize);
+db.UlasanModulModel = require('./ulasanmodul.model')(sequelize, Sequelize);
 
 
 

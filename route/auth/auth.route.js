@@ -173,7 +173,7 @@ router.put('/new_pass', newpassValidator , async (req, res) => {
         };
 
       const updateUser = await userModel.update({
-          password: hashedPassword
+          password: hashedPassword,
       }, {
           where: {
               id: id
