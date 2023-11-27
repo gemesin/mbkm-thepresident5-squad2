@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../../middleware/middleware');
 
 const { SECRET_KEY } = require("../../items");
 const { articleModel } = require('../../models');
 const { body, validationResult } = require("express-validator");
 const erorHandlerMiddleware = require('../../middleware/error-handling');
 
-router.post('/add_article', async (req, res) => {
+router.use(protect);
+
+router.post('/add_article', protect, async (req, res) => {
   try {
     const data = req.body;
 
@@ -18,14 +21,15 @@ router.post('/add_article', async (req, res) => {
         article: data.article,
       });
 
-    res.status(201).json({ message: 'Article added successfully' });
+    res.status(201).json({ 
+      message: 'Article added successfully', });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'It was a mistake to add the article' });
+    res.status(5400).json({ message: 'It was a mistake to add the article' });
   }
 });
 
-router.get('/all_article', async (req, res) => {
+router.get('/all_article', protect, async (req, res) => {
     try {
       const articles = await articleModel.findAllArticles();
       res.status(200).json(articles);
@@ -35,7 +39,7 @@ router.get('/all_article', async (req, res) => {
     }
   });
 
-  router.get('/article_id', async (req, res) => {
+  router.get('/article_id', protect, async (req, res) => {
     try {
       const { id } = req.query;
   
