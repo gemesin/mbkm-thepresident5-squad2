@@ -1,12 +1,17 @@
 const express = require("express");
+const bodyParser = require('body-parser');
+const path = require('node:path');
 const app = express();
-
 const db = require('./models')
 
-const weatherRoute = require('./route/wheater/user.route')
+const multer  = require('multer');
 
+
+const weatherRoute = require('./route/wheater/user.route')
 const authRoute = require("./route/auth/auth.route");
 const articleRoute = require("./route/artikel/route.index")
+const lmsRoute = require("./route/LMS/lms.route")
+const uploadImages = require("./route/upload.route")
 
 
 db.sequelize
@@ -26,11 +31,17 @@ app.get('/', (req, res) => {
 })
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use("/weather",weatherRoute);
 app.use("/auth", authRoute);
 app.use("/article",articleRoute);
+app.use("/lms",lmsRoute);
+app.use("/upload",uploadImages);
+
+app.use('/images',express.static('images'))
 
 const port = 8002;
 

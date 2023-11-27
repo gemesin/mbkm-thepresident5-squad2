@@ -38,6 +38,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             field: 'rain_chance'
         },
+        uv_index: {
+            type: Sequelize.FLOAT,
+            allowNull: false,
+            field: 'uv_index'
+        },
         wind_speed: {
             type: Sequelize.FLOAT,
             allowNull: false,
@@ -49,9 +54,14 @@ module.exports = (sequelize, Sequelize) => {
             field: 'rain_volume'
         },
         weather_icon: {
-            type: Sequelize.STRING,
+            type: Sequelize.TEXT,
             allowNull: false,
             field: 'weather_icon'
+        },
+        suggest: {
+            type: Sequelize.TEXT,
+            allowNull: false,
+            field: 'suggest'
         },
         cached: {
             type: Sequelize.BOOLEAN,
@@ -67,6 +77,16 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.JSON, // Sesuaikan dengan tipe data di database
             allowNull: false,
             field: 'weakly_weather'
+        },
+        createdAt: {
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.literal('current_timestamp()'), 
+            field: 'createdAt'
+        },
+        updatedAt: {
+            type: Sequelize.DATE,
+            allowNull: true, 
+            field: 'updatedAt'
         },
         
     });

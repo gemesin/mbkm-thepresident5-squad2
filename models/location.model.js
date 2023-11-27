@@ -26,6 +26,16 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             field: 'location_name' 
         },
+        createdAt: {
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.literal('current_timestamp()'), 
+            field: 'createdAt'
+        },
+        updatedAt: {
+            type: Sequelize.DATE,
+            allowNull: true, 
+            field: 'updatedAt'
+        },
         
     });
 
