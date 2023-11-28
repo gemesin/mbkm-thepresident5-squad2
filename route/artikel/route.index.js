@@ -32,10 +32,15 @@ router.post('/add_article', protect, async (req, res) => {
 router.get('/all_article', protect, async (req, res) => {
     try {
       const articles = await articleModel.findAllArticles();
-      res.status(200).json(articles);
+      res.status(201).json({
+        error: false,
+        articles});
+
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Internal Server Error' });
+      res.status(400).json({ 
+        error: true,
+        message: 'Internal Server Error' });
     }
   });
 
@@ -44,13 +49,17 @@ router.get('/all_article', protect, async (req, res) => {
       const id = req.params.id;
   
       if (!id || isNaN(id)) {
-        return res.status(400).json({ message: 'Invalid ID parameter' });
+        return res.status(400).json({
+            error: true,
+            message: 'Invalid ID parameter' });
       }
   
       const article = await articleModel.findByPk(id);
   
       if (!article) {
-        return res.status(404).json({ message: 'Article not found' });
+        return res.status(400).json({ 
+            error: true,
+            message: 'Article not found' });
       }
   
       res.status(200).json({
@@ -64,7 +73,9 @@ router.get('/all_article', protect, async (req, res) => {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Internal Server Error' });
+      res.status(400).json({ 
+        error: true,
+        message: 'Internal Server Error' });
     }
   });
   
