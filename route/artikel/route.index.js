@@ -39,9 +39,9 @@ router.get('/all_article', protect, async (req, res) => {
     }
   });
 
-  router.get('/article_id', protect, async (req, res) => {
+  router.get('/article_id/:id', protect, async (req, res) => {
     try {
-      const { id } = req.query;
+      const id = req.params.id;
   
       if (!id || isNaN(id)) {
         return res.status(400).json({ message: 'Invalid ID parameter' });
