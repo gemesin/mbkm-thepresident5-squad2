@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Modul = require('./modul.model')(sequelize, Sequelize);
+    const GroupModul = require('./groupmodul.model')(sequelize, Sequelize);
     const User = require('./user.model')(sequelize, Sequelize);
     // Define the model for the modul table
     const UlasanModulModel = sequelize.define('ulasan_modul', {
@@ -12,7 +12,7 @@ module.exports = (sequelize, Sequelize) => {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
-        id_modul: {
+        id_group: {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
@@ -20,6 +20,15 @@ module.exports = (sequelize, Sequelize) => {
           type: Sequelize.STRING,
           allowNull: false,
       },
+      pekerjaan: { 
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+
+       rating: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+    },
         isi: {
           type: Sequelize.TEXT,
         },
@@ -36,7 +45,7 @@ module.exports = (sequelize, Sequelize) => {
       
       // Define the relationships with the target_users and target_moduls tables
       UlasanModulModel.belongsTo(User, { foreignKey: 'id_user' });
-      UlasanModulModel.belongsTo(Modul, { foreignKey: 'id_modul' });
+      UlasanModulModel.belongsTo(GroupModul, { foreignKey: 'id_group' });
     
       return UlasanModulModel;
     };
