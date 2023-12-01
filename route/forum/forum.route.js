@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../../middleware/middleware');
-const { ForumModel } = require('../../models');
+const { ForumModel , commentModel } = require('../../models');
 const erorHandlerMiddleware = require('../../middleware/error-handling');
 const multer = require('multer');
 const path = require('node:path');
@@ -78,41 +78,70 @@ router.post('/upload_and_add_forum', protect, upload.single('image'), async (req
   }
 });
 
+
+router.get('/notifikasi', async (req, res) => {
+    const loggedInUser = req.user;
+    const id =  loggedInUser.id
+        try {
+          const comment = await commentModel.findAll({
+            where: {
+                reply_user : id
+      
+            }
+        });
+        
+          return res.status(201).json({
+            error: false,
+            message: "notifikasi",
+            nama: comment.name + " menanggapi postingan anda"
+            
+        });
+            
+        } catch (error) {
+            console.error(error);
+            res.status(400).json({ 
+                error: true,
+                message: 'Kesalahan saat mengunggah' });
+        }
+      
+  });
+
+
 router.get('/test', async (req, res) => {
   res.status(201).json({ message: 'lms access!' });
 });
 
-router.post('/add_forum', protect, async (req, res) => {
-  try {
-    const forum = req.body;
-    const loggedInUser = req.user;
+// router.post('/add_forum', protect, async (req, res) => {
+//   try {
+//     const forum = req.body;
+//     const loggedInUser = req.user;
 
-    const forumbaru = await ForumModel.create({
-      id_user: loggedInUser.id,
-      name: loggedInUser.name,
-      fill: forum.isi,
-      image: forum.image,
-    });
+//     const forumbaru = await ForumModel.create({
+//       id_user: loggedInUser.id,
+//       name: loggedInUser.name,
+//       fill: forum.isi,
+//       image: forum.image,
+//     });
 
-    return res.status(200).json({
-      errr: false,
-      message: "Tambah forum berhasil",
-      Ulasan: {
-        id_user: forumbaru.id_user,
-        name: forumbaru.name,
-        isi: forumbaru.fill,
-        image: forumbaru.image,
-      },
-    });
+//     return res.status(200).json({
+//       errr: false,
+//       message: "Tambah forum berhasil",
+//       Ulasan: {
+//         id_user: forumbaru.id_user,
+//         name: forumbaru.name,
+//         isi: forumbaru.fill,
+//         image: forumbaru.image,
+//       },
+//     });
 
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      error: true,
-      message: 'Kesalahan saat mengunggah forum'
-    });
-  }
-});
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).json({
+//       error: true,
+//       message: 'Kesalahan saat mengunggah forum'
+//     });
+//   }
+// });
 
 router.use(erorHandlerMiddleware);
 
