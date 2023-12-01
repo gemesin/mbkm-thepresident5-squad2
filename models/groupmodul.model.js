@@ -2,7 +2,7 @@
 module.exports = (sequelize, Sequelize) => {
 
   const User = require('./user.model')(sequelize, Sequelize);
-  const GroupArticleModel = sequelize.define('group_article', {
+  const GroupArticleModel = sequelize.define('group_modul', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,

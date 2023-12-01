@@ -77,7 +77,9 @@ router.post("/login", loginValidator, async (req, res) => {
   if (!isMatch) {
     return res
       .status(401)
-      .json({ status: "failed", message: "Invalid username or password" });
+      .json({ error: true,
+        status: "failed", 
+        message: "Invalid username or password" });
   }
 
   // Password valid, buat dan kirimkan token

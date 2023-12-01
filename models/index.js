@@ -32,9 +32,10 @@ db.commentModel = require('./comment.model')(sequelize, Sequelize);
 db.locationModel = require('./location.model')(sequelize, Sequelize);
 db.weather_dataModel = require('./weather_data.model')(sequelize, Sequelize);
 db.articleModel = require('./article.model')(sequelize, Sequelize);
-db.GroupArticleModel = require('./groupmodul.model')(sequelize, Sequelize);
+db.GroupModulModel = require('./groupmodul.model')(sequelize, Sequelize);
 db.ModulModel = require('./modul.model')(sequelize, Sequelize);
 db.UlasanModulModel = require('./ulasanmodul.model')(sequelize, Sequelize);
+db.ForumModel = require('./forum.model')(sequelize, Sequelize);
 
 
 

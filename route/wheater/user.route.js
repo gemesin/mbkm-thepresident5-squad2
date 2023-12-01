@@ -110,14 +110,16 @@ router.get('/weather', protect, async (req, res) => {
             return suggest[group];
         };
 
-        const currentTimestamp = currentWeatherData.dt  + 7 * 3600;
+        const currentTimestamp = currentWeatherData.dt + 7 * 3600;
 
         // Ambil data cuaca per jam untuk 6 jam ke depan
         const hourlyWeather = hourlyWeatherData.hourly.filter(hour => hour.dt >= currentTimestamp && hour.dt <= currentTimestamp + 6 * 3600);
-        
+        const hourlyWeatherbefore = hourlyWeatherData.hourly.filter(hour => hour.dt <= currentTimestamp && hour.dt > currentTimestamp - 3600);
+
+
         const previousHourTimestamp = currentTimestamp - 3600;
-        
-        const hourlyWeatherBefore = hourlyWeather
+
+        const hourlyWeatherBefore = hourlyWeatherbefore
             .filter(hour => hour.dt >= previousHourTimestamp && hour.dt < currentTimestamp)
             .map(hour => ({
                 time: new Date(hour.dt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
@@ -128,9 +130,9 @@ router.get('/weather', protect, async (req, res) => {
                 weatherDescription: hour.weather[0].description,
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
-        
+
         console.log("data sebelum: " + hourlyWeatherBefore);
-        
+
         const hourlyWeatherNow = {
             time: new Date(currentTimestamp * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
             temperature: hourlyWeatherData.current.temp - 273.15,
@@ -140,9 +142,9 @@ router.get('/weather', protect, async (req, res) => {
             wind_speed: hourlyWeatherData.current.wind_speed,
             weatherIcon: getWeatherLogo(hourlyWeatherData.current.weather[0].id)
         };
-        
+
         const currentTimestampPlus5Hours = currentTimestamp + 5 * 3600;
-        
+
         const hourlyWeatherNext5Hours = hourlyWeather
             .filter(hour => hour.dt > currentTimestamp && hour.dt <= currentTimestampPlus5Hours)
             .map(hour => ({
@@ -154,9 +156,9 @@ router.get('/weather', protect, async (req, res) => {
                 wind_speed: hour.wind_speed,
                 weatherIcon: getWeatherLogo(hour.weather[0].id)
             }));
-        
+
         const hourlyWeatherSorted = hourlyWeatherBefore.concat(hourlyWeatherNow, hourlyWeatherNext5Hours);
-        
+
         const weeklyWeather = weaklyWeatherData.daily.slice(0, 7);
 
         const lastHourlyWeatherBefore = hourlyWeatherNow[hourlyWeatherNow.length - 1];

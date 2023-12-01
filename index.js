@@ -13,6 +13,7 @@ const authRoute = require("./route/auth/auth.route");
 const articleRoute = require("./route/artikel/route.index")
 const lmsRoute = require("./route/LMS/lms.route")
 const uploadImages = require("./route/upload.route")
+const forumRoute = require('./route/forum/forum.route')
 
 
 db.sequelize
@@ -41,6 +42,7 @@ app.use("/auth", authRoute);
 app.use("/article",articleRoute);
 app.use("/lms",lmsRoute);
 app.use("/upload",uploadImages);
+app.use("/forum",forumRoute);
 
 app.use('/images',express.static('images'))
 
