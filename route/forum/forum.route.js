@@ -256,9 +256,13 @@ router.post('/balasan/:id_forum', protect, async (req, res) => {
     const loggedInUser = req.user;
     const idForum = req.params.id_forum;
     const { isi } = req.body;
+    const komentars = await ForumModel.findOne({
+      where: { id: idForum },
+    });
 
     const komentarBaru = await commentModel.create({
       id_user: loggedInUser.id,
+      id_target: komentars.id_user,
       name: loggedInUser.name,
       id_forum: idForum,
       fill: isi,
