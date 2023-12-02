@@ -114,6 +114,81 @@ router.post('/add_forum', protect, async (req, res) => {
   }
 });
 
+router.get('/forum/:id',protect, async (req, res) => {
+  try {
+    const forumId = req.params.id;
+
+    const forum = await ForumModel.findByPk(forumId);
+
+    if (!forum) {
+      return res.status(404).json({
+        error: true,
+        message: 'Forum tidak ditemukan.',
+      });
+    }
+
+    const komentars = await KomentarModel.findAll({
+      where: { id_forum: forumId },
+    });
+
+    const response = {
+      forum: {
+        id_user: forum.id_user,
+        name: forum.name,
+        isi: forum.fill,
+        image: forum.image,
+      },
+      komentars: komentars.map(komentar => ({
+        id_user: komentar.id_user,
+        name: komentar.name,
+        isi: komentar.fill,
+        image: komentar.image,
+      })),
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: true,
+      message: 'Terjadi kesalahan saat mengambil data forum.',
+    });
+  }
+});
+
+router.post('/balasan/:id_forum', protect, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const idForum = req.params.id_forum;
+    const { isi, image } = req.body;
+
+    const komentarBaru = await KomentarModel.create({
+      id_user: loggedInUser.id,
+      name: loggedInUser.name,
+      id_forum: idForum,
+      fill: isi,
+      image: image || null, // Opsional: Gambar balasan
+    });
+
+    res.status(201).json({
+      error: false,
+      message: 'Balasan berhasil ditambahkan',
+      Balasan: {
+        id_user: komentarBaru.id_user,
+        name: komentarBaru.name,
+        isi: komentarBaru.fill,
+        image: komentarBaru.image,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: true,
+      message: 'Terjadi kesalahan saat menambahkan balasan.',
+    });
+  }
+});
+
 router.use(erorHandlerMiddleware);
 
 module.exports = router;
