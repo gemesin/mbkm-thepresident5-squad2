@@ -6,7 +6,9 @@ const erorHandlerMiddleware = require('../../middleware/error-handling');
 const multer = require('multer');
 const path = require('node:path');
 const { uptime } = require('node:process');
+const forumModel = require('../../models/forum.model');
 const fs = require('fs').promises;
+const { Sequelize } = require('sequelize');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -36,7 +38,7 @@ router.post('/upload_and_add_forum', protect, upload.single('image'), async (req
         image: null,
       });
   
-      res.status(200).json({
+      res.status(201).json({
         error: false,
         message: "Tambah forum berhasil",
         Ulasan: {
@@ -59,7 +61,7 @@ router.post('/upload_and_add_forum', protect, upload.single('image'), async (req
       image: fileUrl,
     });
 
-    res.status(200).json({
+    res.status(201).json({
       error: false,
       message: "Tambah forum berhasil",
       Ulasan: {
@@ -71,7 +73,7 @@ router.post('/upload_and_add_forum', protect, upload.single('image'), async (req
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       error: true,
       message: 'Terjadi kesalahan saat mengunggah file atau menambah forum.',
     });
@@ -143,6 +145,47 @@ router.get('/test', async (req, res) => {
 //   }
 // });
 
+router.get('/allforum', protect, async (req, res) => {
+  try {
+    // const forumDenganKomentar = await ForumModel.findAll({
+    //   attributes: [
+    //     ['id', 'forumId'],
+    //     'fill',
+    //     'image',
+    //     [Sequelize.fn('COUNT', Sequelize.col('comments.id')), 'jumlahKomentar']
+    //   ],
+    //   include: [{
+    //     model: commentModel,
+    //     as: 'comments',
+    //     attributes: [],
+    //     required: false,
+    //   }],
+    //   group: ['Forum.id', 'fill', 'image'],
+    //   raw: true,
+    // });
+
+    const allForum = await ForumModel.findAll();
+
+    const forumDenganKomentar = await Promise.all(allForum.map(async (forum) => {
+      const jumlahKomentar = await commentModel.count({ where:{id_forum: forum.id }});
+      return {
+        forumId: forum.id,
+        judul: forum.judul,
+        isi: forum.isi,
+        image: forum.image,
+        jumlahKomentar: jumlahKomentar,
+      };
+    }));
+
+    res.json(forumDenganKomentar);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      error: true,
+       message: 'Terjadi kesalahan saat mengambil data forum.' });
+  }
+});
+
 router.get('/forum/:id',protect, async (req, res) => {
   try {
     const forumId = req.params.id;
@@ -150,13 +193,13 @@ router.get('/forum/:id',protect, async (req, res) => {
     const forum = await ForumModel.findByPk(forumId);
 
     if (!forum) {
-      return res.status(404).json({
+      return res.status(400).json({
         error: true,
         message: 'Forum tidak ditemukan.',
       });
     }
 
-    const komentars = await KomentarModel.findAll({
+    const komentars = await commentModel.findAll({
       where: { id_forum: forumId },
     });
 
@@ -175,10 +218,10 @@ router.get('/forum/:id',protect, async (req, res) => {
       })),
     };
 
-    res.status(200).json(response);
+    res.status(201).json(response);
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       error: true,
       message: 'Terjadi kesalahan saat mengambil data forum.',
     });
@@ -189,14 +232,13 @@ router.post('/balasan/:id_forum', protect, async (req, res) => {
   try {
     const loggedInUser = req.user;
     const idForum = req.params.id_forum;
-    const { isi, image } = req.body;
+    const { isi } = req.body;
 
-    const komentarBaru = await KomentarModel.create({
+    const komentarBaru = await commentModel.create({
       id_user: loggedInUser.id,
       name: loggedInUser.name,
       id_forum: idForum,
       fill: isi,
-      image: image || null, // Opsional: Gambar balasan
     });
 
     res.status(201).json({
@@ -206,12 +248,11 @@ router.post('/balasan/:id_forum', protect, async (req, res) => {
         id_user: komentarBaru.id_user,
         name: komentarBaru.name,
         isi: komentarBaru.fill,
-        image: komentarBaru.image,
       },
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       error: true,
       message: 'Terjadi kesalahan saat menambahkan balasan.',
     });
