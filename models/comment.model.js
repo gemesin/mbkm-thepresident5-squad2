@@ -15,10 +15,16 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
     },
+    id_target: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+    
     name: {
       type: Sequelize.STRING,
       allowNull: false,
     },
+
     fill: {
       type: Sequelize.TEXT,
       allowNull: true,
@@ -46,6 +52,10 @@ module.exports = (sequelize, Sequelize) => {
   // Definisikan hubungan antara Comment dan Thread
   Comment.belongsTo(Forum, {
     foreignKey: 'id_forum',
+  });
+
+  Comment.belongsTo(Forum, {
+    foreignKey: 'id_target',
   });
 
   return Comment;

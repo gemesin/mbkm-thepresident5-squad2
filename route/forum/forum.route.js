@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { Sequelize } = require('sequelize');
 const { protect } = require('../../middleware/middleware');
 const { ForumModel , commentModel } = require('../../models');
 const erorHandlerMiddleware = require('../../middleware/error-handling');
@@ -79,29 +80,52 @@ router.post('/upload_and_add_forum', protect, upload.single('image'), async (req
 });
 
 
-router.get('/notifikasi', async (req, res) => {
+router.get('/notifikasi', protect, async (req, res) => {
     const loggedInUser = req.user;
     const id =  loggedInUser.id
         try {
-          const comment = await commentModel.findAll({
+          const forumsAndComments = await commentModel.findAll({
+            attributes: ['id', 'id_forum', 'name', 'fill'],
             where: {
-                reply_user : id
+              id_target: id,
+            },
+            include: [
+              {
+                model: ForumModel,
+                attributes: ['id_user', 'name', 'image', 'fill'],
+                on: {
+                  id_forum: Sequelize.literal('`comment`.`id_forum` = `forum`.`id`'),
+                },
+                required: true,
+              },
+            ],
+          });
       
-            }
-        });
+          // Format dan kirimkan respons
+          const formattedForums = forumsAndComments.map((forum) => {
+            return {
+              pesan: forum.name+" mengomentari postingan anda "+forum.forum.fill,
+              gambar:forum.forum.image,
+              comments: [
+                {
+                  id: forum.id,
+                  fill: forum.fill,
+                },
+              ],
+            };
+          });
         
-          return res.status(201).json({
+          res.status(200).json({
             error: false,
-            message: "notifikasi",
-            nama: comment.name + " menanggapi postingan anda"
-            
-        });
-            
+            message: 'Data berhasil diambil',
+            formattedForums
+          });
         } catch (error) {
-            console.error(error);
-            res.status(400).json({ 
-                error: true,
-                message: 'Kesalahan saat mengunggah' });
+          console.error(error);
+          res.status(500).json({
+            error: true,
+            message: 'Terjadi kesalahan saat mengambil data forum dan comment.',
+          });
         }
       
   });
