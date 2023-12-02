@@ -9,7 +9,6 @@ const path = require('node:path');
 const { uptime } = require('node:process');
 const forumModel = require('../../models/forum.model');
 const fs = require('fs').promises;
-const { Sequelize } = require('sequelize');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
