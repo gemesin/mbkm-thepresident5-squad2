@@ -193,8 +193,8 @@ router.get('/allforum', protect, async (req, res) => {
       const jumlahKomentar = await commentModel.count({ where:{id_forum: forum.id }});
       return {
         forumId: forum.id,
-        judul: forum.judul,
-        isi: forum.isi,
+        nama: forum.name,
+        isi: forum.fill,
         image: forum.image,
         jumlahKomentar: jumlahKomentar,
       };
