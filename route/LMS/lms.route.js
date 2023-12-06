@@ -126,66 +126,136 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
 
   });
 
-router.get('/all_modul/:id_group',  protect, async (req, res) => {
-  try {
-    const idgroup = req.params.id_group
-  
-    const modul = await ModulModel.findAll({
-      where: {
-          id_group: idgroup
-
-      }
-  });
-  
-    return res.status(201).json({
-      error: false,
-      message: "Berhasil!",
-      Modul: {
-        
-        modul
-      },
-  });
-      
-  } catch (error) {
-      console.error(error);
-      res.status(400).json({ 
-          error: true,
-          message: 'Kesalahan saat mengunggah ulasan' });
-  }
-
-
-  });
-
-
-  router.get('/modul/:id',  protect, async (req, res) => {
+  router.get('/all_modul/:id_group', protect, async (req, res) => {
     try {
-      const idgroup = req.params.id
-    
-      const modul = await ModulModel.findOne({
-        where: {
-            id: idgroup
+      const idgroup = req.params.id_group;
+      const loggedInUser = req.user;
+      let idmodul_access = loggedInUser.modulcheck_id;
   
+      // Pastikan idmodul_access berbentuk array
+      if (!Array.isArray(idmodul_access?.idmodul_access)) {
+        idmodul_access = { idmodul_access: [] };
+      } 
+        // Konversi setiap elemen dalam array menjadi tipe data angka
+        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
+      
+  
+      const modul = await ModulModel.findAll({
+        where: {
+          id_group: idgroup
         }
-    });
-    
+      });
+  
       return res.status(201).json({
         error: false,
         message: "Berhasil!",
         Modul: {
-          
-          modul
+          modul,
+          modulchek_user: idmodul_access,
         },
-    });
-        
+      });
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ 
-            error: true,
-            message: 'Kesalahan saat mengunggah ulasan' });
+      console.error(error);
+      res.status(400).json({
+        error: true,
+        message: 'Kesalahan saat mengunggah ulasan',
+      });
     }
+  });
+  
+
+
+  router.get('/modul/:id', protect, async (req, res) => {
+    try {
+      const idgroup = req.params.id;
+      const loggedInUser = req.user;
+      const modulcheck_id = loggedInUser.modulcheck_id;
+  
+      if (!modulcheck_id || !modulcheck_id.idmodul_access.includes(idgroup)) {
+        // Jika modulcheck_id belum ada atau id_modul belum tersimpan, tambahkan ID modul ke dalam array
+        const modulcheck_data = {
+          idmodul_access: modulcheck_id
+            ? [...modulcheck_id.idmodul_access, idgroup]
+            : [idgroup],
+        };
+  
+        await userModel.update(
+          // Data yang akan diperbarui
+          { modulcheck_id: modulcheck_data },
+  
+          // Kriteria pembaruan
+          { where: { id: loggedInUser.id } }
+        );
+  
+        const user = await userModel.findOne({
+          where: {
+            id: loggedInUser.id,
+          },
+        });
+  
+        const modul = await ModulModel.findOne({
+          where: {
+            id: idgroup,
+          },
+        });
+
+        let idmodul_access = user.modulcheck_id;
+         // Pastikan idmodul_access berbentuk array
+      if (!Array.isArray(idmodul_access?.idmodul_access)) {
+        idmodul_access = { idmodul_access: [] };
+      } 
+        // Konversi setiap elemen dalam array menjadi tipe data angka
+        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
+  
+        return res.status(201).json({
+          error: false,
+          message: "Berhasil!",
+          Modul: {
+            modul,
+            modulchek_user: idmodul_access,
+          },
+        });
+      }
+  
+      // Jika id_modul sudah tersimpan, kirim respons tanpa melakukan pembaruan
+      const user = await userModel.findOne({
+        where: {
+          id: loggedInUser.id,
+        },
+      });
+  
+      const modul = await ModulModel.findOne({
+        where: {
+          id: idgroup,
+        },
+      });
+
+      let idmodul_access = user.modulcheck_id;
+         // Pastikan idmodul_access berbentuk array
+      if (!Array.isArray(idmodul_access?.idmodul_access)) {
+        idmodul_access = { idmodul_access: [] };
+      } 
+        // Konversi setiap elemen dalam array menjadi tipe data angka
+        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
   
   
-    });
+      return res.status(201).json({
+        error: false,
+        message: "Berhasil!",
+        Modul: {
+          modul,
+          modulchek_user: idmodul_access,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({
+        error: true,
+        message: 'Kesalahan saat mengunggah ulasan',
+      });
+    }
+  });
+  
 
 router.post('/add_ulasan/:id_group', protect, async (req, res) => {
 try {
