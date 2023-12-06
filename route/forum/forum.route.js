@@ -169,34 +169,38 @@ router.get('/test', async (req, res) => {
 // });
 
 router.get('/allforum', protect, async (req, res) => {
+  function formatTimeDifference(timeDifference) {
+    // Hitung detik, menit, jam, hari, dsb.
+    const seconds = Math.floor(timeDifference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+  
+    if (days > 0) {
+      return `${days} hari yang lalu`;
+    } else if (hours > 0) {
+      return `${hours} jam yang lalu`;
+    } else if (minutes > 0) {
+      return `${minutes} menit yang lalu`;
+    } else {
+      return `${seconds} detik yang lalu`;
+    }}
+  
   try {
-    // const forumDenganKomentar = await ForumModel.findAll({
-    //   attributes: [
-    //     ['id', 'forumId'],
-    //     'fill',
-    //     'image',
-    //     [Sequelize.fn('COUNT', Sequelize.col('comments.id')), 'jumlahKomentar']
-    //   ],
-    //   include: [{
-    //     model: commentModel,
-    //     as: 'comments',
-    //     attributes: [],
-    //     required: false,
-    //   }],
-    //   group: ['Forum.id', 'fill', 'image'],
-    //   raw: true,
-    // });
-
     const allForum = await ForumModel.findAll();
 
     const forumDenganKomentar = await Promise.all(allForum.map(async (forum) => {
       const jumlahKomentar = await commentModel.count({ where:{id_forum: forum.id }});
+      const waktuUpload = formatTimeDifference(new Date() - new Date(forum.createdAt));
+
       return {
         forumId: forum.id,
         nama: forum.name,
         isi: forum.fill,
         image: forum.image,
         jumlahKomentar: jumlahKomentar,
+        createdAt: forum.createdAt, // Tambahkan waktu pembuatan forum
+        waktuUpload: waktuUpload,
       };
     }));
 
@@ -205,9 +209,51 @@ router.get('/allforum', protect, async (req, res) => {
     console.error(error);
     res.status(400).json({
       error: true,
-       message: 'Terjadi kesalahan saat mengambil data forum.' });
+      message: 'Terjadi kesalahan saat mengambil data forum.'
+    });
   }
+  
 });
+
+  // try {
+  //   // const forumDenganKomentar = await ForumModel.findAll({
+  //   //   attributes: [
+  //   //     ['id', 'forumId'],
+  //   //     'fill',
+  //   //     'image',
+  //   //     [Sequelize.fn('COUNT', Sequelize.col('comments.id')), 'jumlahKomentar']
+  //   //   ],
+  //   //   include: [{
+  //   //     model: commentModel,
+  //   //     as: 'comments',
+  //   //     attributes: [],
+  //   //     required: false,
+  //   //   }],
+  //   //   group: ['Forum.id', 'fill', 'image'],
+  //   //   raw: true,
+  //   // });
+
+  //   const allForum = await ForumModel.findAll();
+
+  //   const forumDenganKomentar = await Promise.all(allForum.map(async (forum) => {
+  //     const jumlahKomentar = await commentModel.count({ where:{id_forum: forum.id }});
+  //     return {
+  //       forumId: forum.id,
+  //       nama: forum.name,
+  //       isi: forum.fill,
+  //       image: forum.image,
+  //       jumlahKomentar: jumlahKomentar,
+  //     };
+  //   }));
+
+  //   res.json(forumDenganKomentar);
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(400).json({
+  //     error: true,
+  //      message: 'Terjadi kesalahan saat mengambil data forum.' });
+  // }
+
 
 router.get('/forum/:id',protect, async (req, res) => {
   try {
