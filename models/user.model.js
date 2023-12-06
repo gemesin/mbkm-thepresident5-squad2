@@ -36,6 +36,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true, 
             field: 'updatedAt'
         },
+        modulcheck_id: {
+            type: Sequelize.JSON, // Sesuaikan dengan tipe data di database
+            allowNull: true,
+            field: 'modulcheck_id'
+        },
     });
   
     return User;
