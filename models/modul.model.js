@@ -17,9 +17,6 @@ const Groupmodul = require('./groupmodul.model')(sequelize, Sequelize);
     video: {
       type: Sequelize.TEXT,
     },
-    description: {
-      type: Sequelize.STRING(225),
-    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.literal('current_timestamp()'), 
