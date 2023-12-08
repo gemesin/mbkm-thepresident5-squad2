@@ -135,11 +135,12 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
       // Pastikan idmodul_access berbentuk array
       if (!Array.isArray(idmodul_access?.idmodul_access)) {
         idmodul_access = { idmodul_access: [] };
-      } 
-        // Konversi setiap elemen dalam array menjadi tipe data angka
-        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
-      
-  
+      }
+      // Konversi setiap elemen dalam array menjadi tipe data angka
+      idmodul_access.idmodul_access = idmodul_access.idmodul_access.map((item) => ({
+        id_modul: Number(item.id_modul),
+        status: true,
+      }));
       const modul = await ModulModel.findAll({
         where: {
           id_group: idgroup
@@ -171,12 +172,12 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
       const loggedInUser = req.user;
       const modulcheck_id = loggedInUser.modulcheck_id;
   
-      if (!modulcheck_id || !modulcheck_id.idmodul_access.includes(idgroup)) {
+      if (!modulcheck_id || !modulcheck_id.idmodul_access.some(item => item.id_modul === Number(idgroup))) {
         // Jika modulcheck_id belum ada atau id_modul belum tersimpan, tambahkan ID modul ke dalam array
         const modulcheck_data = {
           idmodul_access: modulcheck_id
-            ? [...modulcheck_id.idmodul_access, idgroup]
-            : [idgroup],
+            ? [...modulcheck_id.idmodul_access, { id_modul: Number(idgroup), status: true }]
+            : [{ id_modul: Number(idgroup), status: true }],
         };
   
         await userModel.update(
@@ -198,18 +199,21 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
             id: idgroup,
           },
         });
-
+  
         let idmodul_access = user.modulcheck_id;
-         // Pastikan idmodul_access berbentuk array
-      if (!Array.isArray(idmodul_access?.idmodul_access)) {
-        idmodul_access = { idmodul_access: [] };
-      } 
+        // Pastikan idmodul_access berbentuk array
+        if (!Array.isArray(idmodul_access?.idmodul_access)) {
+          idmodul_access = { idmodul_access: [] };
+        }
         // Konversi setiap elemen dalam array menjadi tipe data angka
-        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
+        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map((item) => ({
+          id_modul: Number(item.id_modul),
+          status: true,
+        }));
   
         return res.status(201).json({
           error: false,
-          message: "Berhasil!",
+          message: 'Berhasil!',
           Modul: {
             modul,
             modulchek_user: idmodul_access,
@@ -229,19 +233,21 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
           id: idgroup,
         },
       });
-
+  
       let idmodul_access = user.modulcheck_id;
-         // Pastikan idmodul_access berbentuk array
+      // Pastikan idmodul_access berbentuk array
       if (!Array.isArray(idmodul_access?.idmodul_access)) {
         idmodul_access = { idmodul_access: [] };
-      } 
-        // Konversi setiap elemen dalam array menjadi tipe data angka
-        idmodul_access.idmodul_access = idmodul_access.idmodul_access.map(Number);
-  
+      }
+      // Konversi setiap elemen dalam array menjadi tipe data angka
+      idmodul_access.idmodul_access = idmodul_access.idmodul_access.map((item) => ({
+        id_modul: Number(item.id_modul),
+        status: true,
+      }));
   
       return res.status(201).json({
         error: false,
-        message: "Berhasil!",
+        message: 'Berhasil!',
         Modul: {
           modul,
           modulchek_user: idmodul_access,
@@ -256,7 +262,7 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
     }
   });
   
-
+  
 router.post('/add_ulasan/:id_group', protect, async (req, res) => {
 try {
   const ulasan = req.body;
