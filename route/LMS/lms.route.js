@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../../middleware/middleware');
 const { SECRET_KEY } = require("../../items");
 const { GroupModulModel, ModulModel, UlasanModulModel, userModel } = require('../../models');
+const Sequelize = require('sequelize');
 const { body, validationResult } = require("express-validator");
 const erorHandlerMiddleware = require('../../middleware/error-handling');
 const ulasanmodulModel = require('../../models/ulasanmodul.model');
@@ -199,6 +200,27 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
             id: idgroup,
           },
         });
+
+
+        const nextmodul =  await ModulModel.findOne({
+          where: {
+            id: {
+              [Sequelize.Op.gt]: idgroup
+            },
+            id_group: modul.id_group
+          },
+          limit: 1
+        });
+
+        const prev = await ModulModel.findOne({
+          where: {
+            id: {
+              [Sequelize.Op.lt]: idgroup
+            },
+            id_group: modul.id_group
+          },
+          limit: 1
+        });
   
         let idmodul_access = user.modulcheck_id;
         // Pastikan idmodul_access berbentuk array
@@ -218,6 +240,8 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
             modul,
             modulchek_user: idmodul_access,
           },
+          next: nextmodul ? nextmodul.id : null,
+        prev: prev? prev.id : null,
         });
       }
   
@@ -234,6 +258,26 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
         },
       });
   
+      const nextmodul =  await ModulModel.findOne({
+        where: {
+          id: {
+            [Sequelize.Op.gt]: idgroup
+          },
+          id_group: modul.id_group
+        },
+        limit: 1
+      });
+
+      const prev = await ModulModel.findOne({
+        where: {
+          id: {
+            [Sequelize.Op.lt]: idgroup
+          },
+          id_group: modul.id_group
+        },
+        limit: 1
+      });
+
       let idmodul_access = user.modulcheck_id;
       // Pastikan idmodul_access berbentuk array
       if (!Array.isArray(idmodul_access?.idmodul_access)) {
@@ -252,6 +296,9 @@ router.get('/getgroup/:id_group',  protect, async (req, res) => {
           modul,
           modulchek_user: idmodul_access,
         },
+        next: nextmodul ? nextmodul.id : null,
+        prev: prev ? prev.id : null,
+
       });
     } catch (error) {
       console.error(error);
